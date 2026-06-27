@@ -1,0 +1,33 @@
+{
+  "name": "@kretoffer/guitar-audio-kit",
+  "version": "0.0.1",
+  "description": "Browser-based guitar audio analysis library: tuner, chord detection, multi-pitch detection, FFT",
+  "keywords": ["guitar", "tuner", "chord-detection", "pitch-detection", "audio-analysis", "web-audio"],
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["dist", "src", "README.md", "README.ru.md", "LICENSE"],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean",
+    "lint": "oxlint",
+    "typecheck": "tsc --noEmit --project tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.1",
+    "oxlint": "^1.69.0",
+    "tsup": "^8.4.0",
+    "typescript": "~6.0.2",
+    "vitest": "^3.1.2"
+  }
+}
