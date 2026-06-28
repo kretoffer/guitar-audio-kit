@@ -1,4 +1,12 @@
-# @kretoffer/guitar-audio-kit
+<p align="center">
+  <h1>@kretoffer/guitar-audio-kit</h1>
+  <!-- <a href="https://github.com/kretoffer/guitar-audio-kit/actions"><img src="https://img.shields.io/github/actions/workflow/status/kretoffer/guitar-audio-kit/publish.yml?style=for-the-badge&logo=npm&label=npm&color=8A2BE2" alt="Npm"></a> -->
+  <a href="https://github.com/kretoffer/guitar-audio-kit/actions"><img src="https://img.shields.io/github/actions/workflow/status/kretoffer/guitar-audio-kit/ci.yml?style=for-the-badge&logo=github&label=tests&color=8A2BE2" alt="Tests">
+  <a href="https://github.com/kretoffer/guitar-audio-kit/stargazers"><img src="https://img.shields.io/github/stars/kretoffer/guitar-audio-kit?style=for-the-badge&logo=githubsponsors&logoColor=FFFFFF&label=stars&color=FFD700" alt="Stars"></a>
+  <a href="https://github.com/kretoffer/guitar-audio-kit/issues"><img src="https://img.shields.io/github/issues/kretoffer/guitar-audio-kit?style=for-the-badge&logo=openbugbounty&logoColor=FFFFFF&label=issues&color=FF6B6B" alt="Issues"></a>
+  <a href="https://github.com/kretoffer/guitar-audio-kit/contributors"><img src="https://img.shields.io/github/contributors/kretoffer/guitar-audio-kit?style=for-the-badge&logo=applepodcasts&logoColor=FFFFFF&label=contributors&color=FF6B6B" alt="Contributors"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/kretoffer/guitar-audio-kit?style=for-the-badge&logo=libreoffice" alt="LICENSE"></a>
+</p>
 
 Браузерная библиотека для анализа гитарного аудио. Детекция высоты тона, множественная детекция, пострунный анализ аккордов и тюнер — всё на клиенте через Web Audio API.
 
