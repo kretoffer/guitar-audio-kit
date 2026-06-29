@@ -13,8 +13,10 @@ export type {
   NoteInfo,
   ChordShape,
   StringStatus,
+  InstrumentName,
+  InstrumentDefinition,
 } from './types.ts'
 export type { TunerConfig } from './Tuner.ts'
 
-export { NOTES, STANDARD_TUNING, FREQ_TABLE } from './constants.ts'
+export { NOTES, STANDARD_TUNING, FREQ_TABLE, INSTRUMENTS, getInstrument, getTuning } from './constants.ts'
 export { frequencyToNote, noteToFrequency, noteNameToMidi } from './utils/frequencies.ts'

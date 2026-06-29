@@ -116,3 +116,68 @@ describe('StringAnalyzer', () => {
     expect(result.confidence).toBeGreaterThan(0)
   })
 })
+
+describe('StringAnalyzer with instrument config', () => {
+  beforeEach(() => {
+    mockMultiDetect.mockReset()
+  })
+
+  it('constructs with instrument name (ukulele)', () => {
+    const analyzer = new StringAnalyzer(mockEngine(), { instrument: 'ukulele' })
+    expect(analyzer.getStringCount()).toBe(4)
+    expect(analyzer.getInstrumentName()).toBe('ukulele')
+    expect(analyzer.getInstrumentDef()?.nameRu).toBe('Укулеле (High-G)')
+  })
+
+  it('constructs with instrument name (balalaika prima)', () => {
+    const analyzer = new StringAnalyzer(mockEngine(), { instrument: 'balalaikaPrima' })
+    expect(analyzer.getStringCount()).toBe(3)
+    expect(analyzer.getInstrumentName()).toBe('balalaikaPrima')
+  })
+
+  it('constructs with instrument name (domra4 prima)', () => {
+    const analyzer = new StringAnalyzer(mockEngine(), { instrument: 'domra4Prima' })
+    expect(analyzer.getStringCount()).toBe(4)
+  })
+
+  it('constructs with instrument name (mandolin)', () => {
+    const analyzer = new StringAnalyzer(mockEngine(), { instrument: 'mandolin' })
+    expect(analyzer.getStringCount()).toBe(8)
+  })
+
+  it('constructs with instrument name (viol violone D)', () => {
+    const analyzer = new StringAnalyzer(mockEngine(), { instrument: 'violVioloneD' })
+    expect(analyzer.getStringCount()).toBe(6)
+  })
+
+  it('constructs with instrument name and custom tuning', () => {
+    const analyzer = new StringAnalyzer(mockEngine(), { instrument: 'guitar', tuning: ['D2', 'A2', 'D3', 'G3', 'B3', 'E4'] })
+    expect(analyzer.getStringCount()).toBe(6)
+  })
+
+  it('throws when custom tuning length mismatches instrument', () => {
+    expect(() => new StringAnalyzer(mockEngine(), { instrument: 'guitar', tuning: ['E2', 'A2', 'D3'] })).toThrow()
+  })
+
+  it('returns null instrument info when constructed without instrument', () => {
+    const analyzer = new StringAnalyzer(mockEngine(), { tuning: ['E2', 'A2', 'D3', 'G3', 'B3', 'E4'] })
+    expect(analyzer.getInstrumentName()).toBeNull()
+    expect(analyzer.getInstrumentDef()).toBeNull()
+  })
+
+  it('works with 7-string guitar', () => {
+    mockMultiDetect.mockReturnValue([])
+    const analyzer = new StringAnalyzer(mockEngine(), { instrument: 'guitar7' })
+    analyzer.setTarget([0, 0, 0, 0, 0, 0, 0])
+    const result = analyzer.analyse()
+    expect(result.strings).toHaveLength(7)
+  })
+
+  it('works with 12-string guitar', () => {
+    mockMultiDetect.mockReturnValue([])
+    const analyzer = new StringAnalyzer(mockEngine(), { instrument: 'guitar12' })
+    analyzer.setTarget(Array.from({ length: 12 }, () => 0))
+    const result = analyzer.analyse()
+    expect(result.strings).toHaveLength(12)
+  })
+})

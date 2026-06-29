@@ -1,10 +1,12 @@
 import type { AudioEngine } from './AudioEngine.ts'
 import { MultiPitchDetector, type DetectedPitch } from './MultiPitchDetector.ts'
 import { noteNameToFrequency } from './utils/frequencies.ts'
-import type { StringState, AnalyseResult } from './types.ts'
+import type { StringState, AnalyseResult, InstrumentName, InstrumentDefinition } from './types.ts'
+import { getInstrument, getTuning } from './constants.ts'
 
 export interface StringAnalyzerConfig {
-  tuning: string[]
+  tuning?: string[]
+  instrument?: InstrumentName
   silenceThreshold?: number
 }
 
@@ -12,18 +14,43 @@ export class StringAnalyzer {
   private engine: AudioEngine
   private multiPitch: MultiPitchDetector
   private tuning: string[]
+  private instrument: InstrumentName | null = null
   private targetFrets: number[] = []
   private silenceThreshold: number
 
   constructor(engine: AudioEngine, config: StringAnalyzerConfig) {
     this.engine = engine
     this.multiPitch = new MultiPitchDetector(engine)
-    this.tuning = config.tuning
     this.silenceThreshold = config.silenceThreshold ?? 0.005
+
+    if (config.instrument) {
+      this.instrument = config.instrument
+      const def = getInstrument(config.instrument)
+      this.tuning = config.tuning ?? getTuning(config.instrument)
+      if (config.tuning && config.tuning.length !== def.stringCount) {
+        throw new Error(
+          `${def.name} expects ${def.stringCount} strings, got ${config.tuning.length}`
+        )
+      }
+    } else {
+      this.tuning = config.tuning ?? []
+    }
   }
 
   setTarget(frets: number[]): void { this.targetFrets = frets }
   setTuning(tuning: string[]): void { this.tuning = tuning }
+
+  getStringCount(): number {
+    return this.tuning.length
+  }
+
+  getInstrumentName(): InstrumentName | null {
+    return this.instrument
+  }
+
+  getInstrumentDef(): InstrumentDefinition | null {
+    return this.instrument ? getInstrument(this.instrument) : null
+  }
 
   analyse(): AnalyseResult {
     const timestamp = Date.now()
@@ -43,7 +70,11 @@ export class StringAnalyzer {
       return { strings, detectedChord: null, targetChord: '', confidence: 0, timestamp, rms, isSilent: true }
     }
 
-    const pitches = this.multiPitch.detect(60, 1200)
+    const maxFreq = this.tuning.some(n => {
+      const m = n.match(/[0-9]+/)
+      return m && parseInt(m[0]) >= 5
+    }) ? 2000 : 1200
+    const pitches = this.multiPitch.detect(60, maxFreq)
 
     const strings: StringState[] = this.tuning.map((openNote, stringIndex) => {
       const fret = this.targetFrets[stringIndex] ?? 0

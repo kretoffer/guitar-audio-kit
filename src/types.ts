@@ -43,3 +43,52 @@ export interface ChordShape {
   fingers: (number | null)[]
   tuning?: string[]
 }
+
+export type InstrumentName =
+  | 'guitar'
+  | 'guitar7'
+  | 'guitar12'
+  | 'bass'
+  | 'bass5'
+  | 'ukulele'
+  | 'ukuleleLowG'
+  | 'ukuleleBaritone'
+  | 'balalaikaPrima'
+  | 'balalaikaSecunda'
+  | 'balalaikaAlto'
+  | 'balalaikaBass'
+  | 'domra3Piccolo'
+  | 'domra3Prima'
+  | 'domra3MezzoSoprano'
+  | 'domra3Alto'
+  | 'domra3Tenor'
+  | 'domra3Bass'
+  | 'domra3ContrabassMinor'
+  | 'domra3ContrabassMajor'
+  | 'domra4Piccolo'
+  | 'domra4Prima'
+  | 'domra4Alto'
+  | 'domra4Tenor'
+  | 'domra4Bass'
+  | 'domra4Contrabass'
+  | 'violPardessus5'
+  | 'violPardessus6'
+  | 'violTreble'
+  | 'violAlto'
+  | 'violTenorA'
+  | 'violTenorG'
+  | 'violBass6'
+  | 'violBass7'
+  | 'violVioloneA'
+  | 'violVioloneG'
+  | 'violVioloneD'
+  | 'mandolin'
+  | 'banjo5'
+
+export interface InstrumentDefinition {
+  name: string
+  nameRu: string
+  stringCount: number
+  defaultTuning: string
+  tunings: Record<string, string[]>
+}

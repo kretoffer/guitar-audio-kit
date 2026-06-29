@@ -1,6 +1,6 @@
 <p align="center">
   <h1>@kretoffer/guitar-audio-kit</h1>
-  <!-- <a href="https://github.com/kretoffer/guitar-audio-kit/actions"><img src="https://img.shields.io/github/actions/workflow/status/kretoffer/guitar-audio-kit/publish.yml?style=for-the-badge&logo=npm&label=npm&color=8A2BE2" alt="Npm"></a> -->
+  <a href="https://www.npmjs.com/package/@kretoffer/guitar-audio-kit"><img src="https://img.shields.io/github/actions/workflow/status/kretoffer/guitar-audio-kit/publish.yml?style=for-the-badge&logo=npm&label=npm&color=8A2BE2" alt="Npm"></a>
   <a href="https://github.com/kretoffer/guitar-audio-kit/actions"><img src="https://img.shields.io/github/actions/workflow/status/kretoffer/guitar-audio-kit/ci.yml?style=for-the-badge&logo=github&label=tests&color=8A2BE2" alt="Tests"></a>
   <a href="https://app.codecov.io/gh/kretoffer/guitar-audio-kit"><img src="https://img.shields.io/codecov/c/github/kretoffer/guitar-audio-kit?style=for-the-badge&logo=codecov
   " alt="Codecov"></a>
@@ -12,13 +12,15 @@
 
 Браузерная библиотека для анализа гитарного аудио. Детекция высоты тона, множественная детекция, пострунный анализ аккордов и тюнер — всё на клиенте через Web Audio API.
 
+Поддерживает множество инструментов: 6/7/12-струнная гитара, бас-гитара, укулеле, балалайка, домра (3- и 4-струнная), виола да гамба, мандолина, банджо — с предустановленными строями.
+
 ## Возможности
 
 - **AudioEngine** — микрофонный вход, БПФ, RMS-энергия
 - **PitchDetector** — автокорреляционная детекция высоты тона с медианным фильтром
 - **MultiPitchDetector** — поиск пиков БПФ с подавлением гармоник
 - **Tuner** — тюнер для одной струны с конечным автоматом стабильности (захват → блокировка → удержание)
-- **StringAnalyzer** — пострунный анализ по форме аккорда (лады): открытые, зажатые и заглушенные струны
+- **StringAnalyzer** — пострунный анализ по форме аккорда (лады): открытые, зажатые и заглушенные струны. Работает с любым количеством струн и инструментов
 - **ChordDetector** — определение названия аккорда по сырым пикам (maj, m, 7, m7, sus2, sus4, dim, aug, dim7, m7b5)
 
 ## Установка
@@ -65,6 +67,28 @@ const analyzer = new StringAnalyzer(engine, {
   silenceThreshold: 0.005,
 })
 analyzer.setTarget([-1, 0, 2, 2, 1, 0]) // Am
+
+function loop() {
+  const result = analyzer.analyse()
+  console.log(result.strings.map(s => `${s.status}`))
+  requestAnimationFrame(loop)
+}
+requestAnimationFrame(loop)
+```
+
+### Анализ для укулеле
+
+```typescript
+import { AudioEngine, StringAnalyzer } from '@kretoffer/guitar-audio-kit'
+
+const engine = new AudioEngine()
+await engine.init()
+
+const analyzer = new StringAnalyzer(engine, {
+  instrument: 'ukulele', // предустановленный инструмент
+  silenceThreshold: 0.005,
+})
+analyzer.setTarget([0, 0, 0, 0]) // все открытые
 
 function loop() {
   const result = analyzer.analyse()
@@ -129,13 +153,17 @@ requestAnimationFrame(loop)
 
 | Конфиг | По умолчанию | Описание |
 |--------|-------------|---------|
-| `tuning` | — | Массив из 6 имён открытых струн |
+| `tuning` | — | Массив имён открытых струн (если не указан `instrument`) |
+| `instrument` | — | Имя предустановленного инструмента — `'guitar'`, `'ukulele'`, `'balalaikaPrima'`, `'domra4Prima'`, `'violTreble'` и др. |
 | `silenceThreshold` | `0.005` | Ниже этого RMS = тишина |
 
 | Метод | Описание |
 |--------|---------|
-| `setTarget(лады)` | Установить ожидаемые лады для всех 6 струн |
+| `setTarget(лады)` | Установить ожидаемые лады для всех струн |
 | `analyse()` | `AnalyseResult` с состояниями каждой струны |
+| `getStringCount()` | Количество струн |
+| `getInstrumentName()` | Имя инструмента или `null` |
+| `getInstrumentDef()` | Определение инструмента (`InstrumentDefinition`) или `null` |
 
 **Статусы струн в зависимости от лада:**
 - `fret === -1` (глушится): есть пик → `extra`, тишина → `inactive`
@@ -161,7 +189,39 @@ requestAnimationFrame(loop)
 
 ### Константы
 
-`NOTES`, `STANDARD_TUNING`, `FREQ_TABLE`
+`NOTES`, `STANDARD_TUNING`, `FREQ_TABLE`, `INSTRUMENTS`
+
+### Инструменты и строи (`InstrumentName`)
+
+| Инструмент | Строк | Строи |
+|---|---|---|
+| `guitar` | 6 | `standard`, `dropD`, `dropC`, `openG`, `openD`, `openA`, `openE`, `dadgad`, `halfStepDown`, `fullStepDown` |
+| `guitar7` | 7 | `standard`, `dropA` |
+| `guitar12` | 12 | `standard` |
+| `bass` | 4 | `standard`, `dropD` |
+| `bass5` | 5 | `standard` |
+| `ukulele` | 4 | `standard` |
+| `ukuleleLowG` | 4 | `standard` |
+| `ukuleleBaritone` | 4 | `standard` |
+| `balalaikaPrima` | 3 | `standard` |
+| `balalaikaSecunda` | 3 | `standard` |
+| `balalaikaAlto` | 3 | `standard` |
+| `balalaikaBass` | 3 | `standard` |
+| `domra3Prima` | 3 | `standard` |
+| `domra4Prima` | 4 | `standard` |
+| `violTreble` | 6 | `standard` |
+| `violBass6` | 6 | `standard` |
+| `mandolin` | 8 | `standard` |
+| `banjo5` | 5 | `standard`, `openG` |
+
+Всего предопределено ~40 инструментов. Полный список см. в типе `InstrumentName` в `types.ts`.
+
+### Хелперы
+
+| Функция | Описание |
+|---------|----------|
+| `getInstrument(name)` | `InstrumentDefinition` по имени |
+| `getTuning(instrument, tuningName?)` | Массив нот для строя (по умолчанию — стандартный строй) |
 
 ## Разработка
 

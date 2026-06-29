@@ -1,6 +1,6 @@
 {
   "name": "@kretoffer/guitar-audio-kit",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Browser-based guitar audio analysis library: tuner, chord detection, multi-pitch detection, FFT",
   "keywords": ["guitar", "tuner", "chord-detection", "pitch-detection", "audio-analysis", "web-audio"],
   "license": "MIT",

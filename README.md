@@ -1,6 +1,6 @@
 <p align="center">
   <h1>@kretoffer/guitar-audio-kit</h1>
-  <!-- <a href="https://github.com/kretoffer/guitar-audio-kit/actions"><img src="https://img.shields.io/github/actions/workflow/status/kretoffer/guitar-audio-kit/publish.yml?style=for-the-badge&logo=npm&label=npm&color=8A2BE2" alt="Npm"></a> -->
+  <a href="https://www.npmjs.com/package/@kretoffer/guitar-audio-kit"><img src="https://img.shields.io/github/actions/workflow/status/kretoffer/guitar-audio-kit/publish.yml?style=for-the-badge&logo=npm&label=npm&color=8A2BE2" alt="Npm"></a>
   <a href="https://github.com/kretoffer/guitar-audio-kit/actions"><img src="https://img.shields.io/github/actions/workflow/status/kretoffer/guitar-audio-kit/ci.yml?style=for-the-badge&logo=github&label=tests&color=8A2BE2" alt="Tests"></a>
   <a href="https://app.codecov.io/gh/kretoffer/guitar-audio-kit"><img src="https://img.shields.io/codecov/c/github/kretoffer/guitar-audio-kit?style=for-the-badge&logo=codecov
   " alt="Codecov"></a>
@@ -10,7 +10,9 @@
   <a href="LICENSE"><img src="https://img.shields.io/github/license/kretoffer/guitar-audio-kit?style=for-the-badge&logo=libreoffice" alt="LICENSE"></a>
 </p>
 
-Browser-based guitar audio analysis library. Provides real-time pitch detection, multi-pitch detection, string-by-string chord analysis, and a tuner — all running client-side via the Web Audio API.
+Browser-based instrument audio analysis library. Provides real-time pitch detection, multi-pitch detection, string-by-string chord analysis, and a tuner — all running client-side via the Web Audio API.
+
+Supports multiple instruments: 6/7/12-string guitar, bass guitar, ukulele, balalaika, domra (3- & 4-string), viola da gamba, mandolin, banjo — with preset tunings.
 
 ## Features
 
@@ -18,7 +20,7 @@ Browser-based guitar audio analysis library. Provides real-time pitch detection,
 - **PitchDetector** – autocorrelation-based pitch detection with median filtering
 - **MultiPitchDetector** – FFT peak picking with harmonic cancellation
 - **Tuner** – single-string tuner with stability-gate state machine (locking → locked → hold)
-- **StringAnalyzer** – per-string analysis against a chord shape (frets), handles open, fretted, and muted strings
+- **StringAnalyzer** – per-string analysis against a chord shape (frets), handles open, fretted, and muted strings. Works with any number of strings and any instrument
 - **ChordDetector** – generic chord name detection from raw pitch sets (maj, m, 7, m7, sus2, sus4, dim, aug, dim7, m7b5)
 
 ## Installation
@@ -65,6 +67,28 @@ const analyzer = new StringAnalyzer(engine, {
   silenceThreshold: 0.005,
 })
 analyzer.setTarget([-1, 0, 2, 2, 1, 0]) // Am shape: mute E, A open, D2 G2 B1 E open
+
+function loop() {
+  const result = analyzer.analyse()
+  console.log(result.strings.map(s => `${s.status}`))
+  requestAnimationFrame(loop)
+}
+requestAnimationFrame(loop)
+```
+
+### Analysis with instrument presets (ukulele)
+
+```typescript
+import { AudioEngine, StringAnalyzer } from '@kretoffer/guitar-audio-kit'
+
+const engine = new AudioEngine()
+await engine.init()
+
+const analyzer = new StringAnalyzer(engine, {
+  instrument: 'ukulele', // uses preset tuning
+  silenceThreshold: 0.005,
+})
+analyzer.setTarget([0, 0, 0, 0]) // all open
 
 function loop() {
   const result = analyzer.analyse()
@@ -129,13 +153,17 @@ The autocorrelation is energy-normalised: `corr /= sumSq`. RMS gate at 0.004.
 
 | Config | Default | Description |
 |--------|---------|-------------|
-| `tuning` | — | Array of 6 open-note names |
+| `tuning` | — | Array of open-note names (optional when `instrument` is set) |
+| `instrument` | — | Preset instrument name — `'guitar'`, `'ukulele'`, `'balalaikaPrima'`, `'domra4Prima'`, `'violTreble'`, etc. |
 | `silenceThreshold` | `0.005` | RMS below this = silent frame |
 
 | Method | Description |
 |--------|-------------|
-| `setTarget(frets)` | Set expected frets for all 6 strings |
+| `setTarget(frets)` | Set expected frets for all strings |
 | `analyse()` | Return `AnalyseResult` with per-string states |
+| `getStringCount()` | Number of strings |
+| `getInstrumentName()` | Instrument name or `null` |
+| `getInstrumentDef()` | `InstrumentDefinition` object or `null` |
 
 **String states per fret value:**
 - `fret === -1` (muted): any pitch → `extra`, silence → `inactive`
@@ -161,7 +189,39 @@ The autocorrelation is energy-normalised: `corr /= sumSq`. RMS gate at 0.004.
 
 ### Constants
 
-`NOTES`, `STANDARD_TUNING`, `FREQ_TABLE`
+`NOTES`, `STANDARD_TUNING`, `FREQ_TABLE`, `INSTRUMENTS`
+
+### Instruments & Tunings (`InstrumentName`)
+
+| Instrument | Strings | Tunings |
+|---|---|---|
+| `guitar` | 6 | `standard`, `dropD`, `dropC`, `openG`, `openD`, `openA`, `openE`, `dadgad`, `halfStepDown`, `fullStepDown` |
+| `guitar7` | 7 | `standard`, `dropA` |
+| `guitar12` | 12 | `standard` |
+| `bass` | 4 | `standard`, `dropD` |
+| `bass5` | 5 | `standard` |
+| `ukulele` | 4 | `standard` |
+| `ukuleleLowG` | 4 | `standard` |
+| `ukuleleBaritone` | 4 | `standard` |
+| `balalaikaPrima` | 3 | `standard` |
+| `balalaikaSecunda` | 3 | `standard` |
+| `balalaikaAlto` | 3 | `standard` |
+| `balalaikaBass` | 3 | `standard` |
+| `domra3Prima` | 3 | `standard` |
+| `domra4Prima` | 4 | `standard` |
+| `violTreble` | 6 | `standard` |
+| `violBass6` | 6 | `standard` |
+| `mandolin` | 8 | `standard` |
+| `banjo5` | 5 | `standard`, `openG` |
+
+~40 instruments predefined. Full list in the `InstrumentName` type in `types.ts`.
+
+### Helpers
+
+| Function | Description |
+|----------|-------------|
+| `getInstrument(name)` | Returns `InstrumentDefinition` by name |
+| `getTuning(instrument, tuningName?)` | Returns note array for the given tuning (defaults to standard) |
 
 ## Development
 
